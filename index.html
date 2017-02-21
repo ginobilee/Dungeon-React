@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dungeon-Free Code Camp challenge</title>
+    <meta charset='UTF-8'>
+
+    <script src='js/react.min.js'></script>
+    <script src='js/react-dom.min.js'></script>
+    <script src='js/browser.min.js'></script>
+
+
+    <link href="css/bootstrap.min.css" rel='stylesheet' />
+    <link href='css/style.css' rel='stylesheet' />
+  </head>
+
+  <body>
+    <div id='root'></div>
+  </body>
+  <script type='text/babel'>
+    const bloodVal=30;//each green cell add 30 blood
+    const soldierC1={
+      attack:10,//one hit get 10 blood
+      blood:20//one has 20 blood
+    },soldierC2={
+      attack:20,
+      blood:30
+    },soldierC3={
+      attack:30,
+      blood:50
+    },soldierC4={
+      attack:40,
+      blood:60
+    },soldierC5={
+      attack:50,
+      blood:100
+    },soldierId=[soldierC1,soldierC2,soldierC3,soldierC4,soldierC5];
+    let layer1={//info for layer 1
+      soldiers:[10,5,0,0,0],//index is soldiers' id,value is number
+      blood:10,//10 blood cells,each
+      weapon:15//the user's weapon will attack 15 more blood
+    };
+
+      class GameManage extends React.Component{
+       constructor(){
+         super();
+         this.addRooms=this.addRooms.bind(this);
+         this.geneNodes=this.geneNodes.bind(this);
+         this.geneBloods=this.geneBloods.bind(this);
+         this.geneWeapon=this.geneWeapon.bind(this);
+         let mapWidth=100,mapHeight=120,cellState=[],i,j,rooms=[],room={};
+         for(i=0;i<mapHeight;i++){
+           let tempRow=[];
+           for(j=0;j<mapWidth;j++){
+             tempRow.push(0);
+           }
+           cellState.push(tempRow);
+         }
+         //generateFirstRoom,'1' for room cell
+         for(i=Math.floor(mapHeight/3);i<Math.floor(mapHeight/3)+9;i++){
+           for(j=Math.floor(mapWidth/3);j<Math.floor(mapWidth/3)+9;j++){
+             cellState[i][j]=1;
+           }
+         }
+         room={
+           origin_col:Math.floor(mapWidth/3),
+           origin_row:Math.floor(mapHeight/3),
+           cols:9,
+           rows:9
+         };
+         rooms.push(room);
+         this.addRooms(cellState,rooms);
+         this.geneNodes(cellState,rooms,layer1);
+         this.geneBloods(cellState,rooms,layer1);
+         this.geneWeapon(cellState,rooms,layer1);
+         //console.log(rooms);
+         this.state=({
+           cellState:cellState
+         });
+       }
+       addRooms(cellState,rooms){
+         let roomNum=rooms.length,parentRI=Math.floor(Math.random()*roomNum),parentRoom=rooms[parentRI],colMin=6,colRange=7,rowMin=7,rowRange=13;
+         let newCols=Math.ceil(Math.random()*colRange+colMin),newRows=Math.ceil(rowMin+Math.random()*rowRange);//6-10 for new room length,20 for new room height
+         let rnFasade=Math.floor(Math.random()*4),newOriginRow,newOriginCol,newEndRow,newEndCol,pStart,pEnd,passi,passj;//0 for top,1 for right,2 for bottom,3 for left
+         switch(rnFasade){
+           case 0:
+             newOriginRow=parentRoom.origin_row-newRows-1;
+             newOriginCol=parentRoom.origin_col-newCols+1+Math.floor(Math.random()*(parentRoom.cols+newCols-1));
+             newEndCol=newOriginCol+newCols-1;
+             passi=parentRoom.origin_row-1;
+             pStart=Math.max(parentRoom.origin_col,newOriginCol);
+             pEnd=Math.min(parentRoom.origin_col+parentRoom.cols-1,newOriginCol+newCols-1);
+             passj=pStart+Math.ceil(Math.random()*(pEnd-pStart));
+             //newOriginCol=newEndCol-newCols;
+             break;
+           case 1:
+            newOriginRow=parentRoom.origin_row-newRows+1+Math.floor(Math.random()*(parentRoom.rows+newRows-1));
+            newOriginCol=parentRoom.origin_col+parentRoom.cols+1;
+            newEndRow=newOriginRow+newRows-1;
+            passj=newOriginCol-1;
+            pStart=Math.max(parentRoom.origin_row,newOriginRow);
+            pEnd=Math.min(parentRoom.origin_row+parentRoom.rows-1,newOriginRow+newRows-1);
+            passi=pStart+Math.ceil(Math.random()*(pEnd-pStart));
+            break;
+          case 2:
+            newOriginRow=parentRoom.origin_row+parentRoom.rows+1;
+            newOriginCol=parentRoom.origin_col-newCols+1+Math.floor(Math.random()*(parentRoom.cols+newCols-1));
+            passi=newOriginRow-1;
+            pStart=Math.max(parentRoom.origin_col,newOriginCol);
+            pEnd=Math.min(parentRoom.origin_col+parentRoom.cols-1,newOriginCol+newCols-1);
+            passj=pStart+Math.ceil(Math.random()*(pEnd-pStart));
+            break;
+          case 3:
+            newEndCol=parentRoom.origin_col-2;
+            newOriginCol=newEndCol-newCols+1;
+            newOriginRow=parentRoom.origin_row-newRows+1+Math.floor(Math.random()*(parentRoom.rows+newRows-1));
+            passj=parentRoom.origin_col-1;
+            pStart=Math.max(parentRoom.origin_row,newOriginRow);
+            pEnd=Math.min(parentRoom.origin_row+parentRoom.rows-1,newOriginRow+newRows-1);
+            passi=pStart+Math.ceil(Math.random()*(pEnd-pStart));
+            break;
+         }
+         let i=0,j=0,used=false;
+         outer:
+         for(i=newOriginRow;i<newOriginRow+newRows;i++){
+           for(j=newOriginCol;j<newOriginCol+newRows;j++){
+             if(i<0 || i>(cellState.length-1) || j<0 || j>(cellState[0].length-1) || cellState[i][j]!=0){
+               used=true;
+               break outer;
+             }
+           }
+         }
+         if(!used){
+           let room={
+             origin_col:newOriginCol,
+             origin_row:newOriginRow,
+             cols:newCols,
+             rows:newRows
+           };
+           for(i=newOriginRow;i<newOriginRow+newRows;i++){
+             for(j=newOriginCol;j<newOriginCol+newCols;j++){
+               cellState[i][j]=1;
+             }
+           }
+           //console.log(passi+':'+passj);
+           if(cellState[passi][passj]==0){
+             cellState[passi][passj]=1;
+           }
+           rooms.push(room);
+           if(rooms.length<20){
+             this.addRooms(cellState,rooms);
+           }
+         }else{
+           this.addRooms(cellState,rooms);
+         }
+       }
+       geneNodes(cellState,rooms,layer){
+         let soldiers=layer.soldiers,i=0,j=0;
+         for(i=0;i<soldiers.length;i++){
+           if(soldiers[i]>0){
+             let rnRoom,celli,cellj;
+             for(j=0;j<soldiers[i];j++){
+               rnRoom=Math.floor(Math.random()*rooms.length);
+               celli=rooms[rnRoom].origin_row+Math.ceil(Math.random()*(rooms[rnRoom].rows-1));
+               cellj=rooms[rnRoom].origin_col+Math.ceil(Math.random()*(rooms[rnRoom].cols-1));
+               if(cellState[celli][cellj]==1){
+                 cellState[celli][cellj]=10+i;//10 for class 1,11 for class 2...
+               }else{
+                 j--;
+               }
+             }
+           }
+         }
+         console.log(soldiers);
+       }
+       geneBloods(cellState,rooms,layer){
+         let bNum=layer.blood,i,rnRoom,celli,cellj;
+         for(i=0;i<bNum;i++){
+           rnRoom=Math.floor(Math.random()*rooms.length);
+           celli=rooms[rnRoom].origin_row+Math.ceil(Math.random()*(rooms[rnRoom].rows-1));
+           cellj=rooms[rnRoom].origin_col+Math.ceil(Math.random()*(rooms[rnRoom].cols-1));
+           if(cellState[celli][cellj]==1){
+             cellState[celli][cellj]=20;//20 for blood
+           }else{
+             i--;
+           }
+         }
+       }
+       geneWeapon(cellState,rooms,layer){
+         let weapon=layer.weapon,i,rnRoom,celli,cellj;
+         for(i=0;i<1;i++){
+           rnRoom=Math.floor(Math.random()*rooms.length);
+           celli=rooms[rnRoom].origin_row+Math.ceil(Math.random()*(rooms[rnRoom].rows-1));
+           cellj=rooms[rnRoom].origin_col+Math.ceil(Math.random()*(rooms[rnRoom].cols-1));
+           if(cellState[celli][cellj]==1){
+             cellState[celli][cellj]=5;//5 for weapon
+           }else{
+             i--;
+           }
+         }
+       }
+       componentDidMount(){
+       }
+       componentDidUpdate(){
+       }
+       render(){
+         let cellState = this.state.cellState,tempValue,len=cellState[0].length;
+         const map = cellState.map(function(ele,ind){
+            let cellRow = ele.map(function(e,i){
+                tempValue=cellState[ind][i];let cn='';
+                switch (tempValue) {
+                  case 0:
+                    cn='cell';
+                    break;
+                  case 1:
+                    cn='cell white';
+                    break;
+                  case 5:
+                    cn='cell orange';
+                    break;
+                  case 10:
+                  case 11:
+                  case 12:
+                  case 13:
+                  case 14:
+                    cn='cell red';
+                    break;
+                  case 20:
+                    cn='cell green';
+                    break;
+                  default:
+                    cn='cell';
+                    break;
+                }
+                return (<div className={cn} key={ind*len+i} data-key={ind*len+i}></div>);
+              },this);
+            return <div className='cellRow' key={ind}><div className='num'>{ind}</div>{cellRow}</div>;
+          },this);
+          return (
+            <div>
+              {map}
+            </div>
+          );
+       }
+    }
+
+    ReactDOM.render(
+      <GameManage />,
+      document.getElementById('root')
+    );
+
+</script>
+</html>
