@@ -41,7 +41,7 @@
     };
     const weapons=[
       {name:'Stick',attack:10},{name:'Stone',attack:20},{name:'Knife',attack:30},{name:'Pistol',attack:60},{name:'Rifle',attack:100}
-    ]
+    ];
 
       var Info = (props) => {
         return <div className='message'>
@@ -88,7 +88,7 @@
                }
                return (<div className={cn} key={ind*len+i} data-key={ind*len+i}></div>);
              },this);
-           return <div className='cellRow' key={ind}><div className='num'>{ind}</div>{cellRow}</div>;
+           return <div className='cellRow' key={ind}>{cellRow}</div>;
          },this);
         const mask = maskArr.map(function(ele,ind){
             let maskRow = ele.map(function(e,i){
@@ -97,9 +97,13 @@
               },this);
             return <div className='cellRow' key={ind}>{maskRow}</div>;
           },this);
+        const test = maskArr[0].map(function(e,i){
+                tempValue=maskArr[0][i];
+                return (<div className='maskcell'>{i}</div>);
+        },this);
         //get the map div offset
         let userRow=props.userAdd.i,offsetTop;
-        console.log(userRow);
+        //console.log(userRow);
         if(userRow<15){
           offsetTop=0;
         }else if(userRow>105){
@@ -129,7 +133,8 @@
          this.geneWeapon=this.geneWeapon.bind(this);
          this.geneUser=this.geneUser.bind(this);
          this.geneMask=this.geneMask.bind(this);
-         let mapWidth=100,mapHeight=120,cellState=[],i,j,rooms=[],room={};
+         this.toggle=this.toggle.bind(this);
+         let mapWidth=90,mapHeight=120,cellState=[],i,j,rooms=[],room={};
          for(i=0;i<mapHeight;i++){
            let tempRow=[];
            for(j=0;j<mapWidth;j++){
@@ -155,11 +160,11 @@
          this.geneBloods(cellState,rooms,layer1);
          this.geneWeapon(cellState,rooms,layer1);
          let userAdd=this.geneUser(cellState,rooms,layer1);
-         //generate mask array,whose size is 30X100
+         //generate mask array,whose size is 30X90
          let maskArr=[];
          for(i=0;i<30;i++){
            let tempRow=[];
-           for(j=0;j<100;j++){
+           for(j=0;j<90;j++){
              tempRow.push(0);
            }
            maskArr.push(tempRow);
@@ -175,7 +180,8 @@
            nextLevel:100,
            layer:1,
            userAdd:userAdd,
-           maskArr:maskArr
+           maskArr:maskArr,
+           trans:false
          });
        }
        addRooms(cellState,rooms){
@@ -321,19 +327,44 @@
          else if(centeri>14){
            centeri=15;
          }
-         for(i=centeri-4;i<centeri+4;i++){
-           for(j=centerj-4;j<centerj+4;j++){
+         for(i=0;i<maskArr.length;i++){
+         	for(j=0;j<maskArr[0].length;j++){
+         		maskArr[i][j]=0;
+         	}
+         }
+         for(i=centeri-5;i<centeri+6;i++){
+           for(j=centerj-5;j<centerj+6;j++){
              maskArr[i][j]=1;
            }
          }
-         for(i=4;i>1;i--){
-           for(j=4;j>5-i;j--){
+         for(i=5;i>2;i--){
+           for(j=5;j>7-i;j--){
              maskArr[centeri-i][centerj-j]=0;
              maskArr[centeri-i][centerj+j]=0;
              maskArr[centeri+i][centerj-j]=0;
              maskArr[centeri+i][centerj+j]=0;
            }
          }
+       }
+       toggle(){
+	     	let trans=this.state.trans,maskArr=this.state.maskArr,userAdd=this.state.userAdd,i,j;
+	     	if(trans){
+       	 	this.geneMask(maskArr,userAdd);
+       	 	this.setState({
+       	 		maskArr:maskArr,
+       	 		trans:!trans
+       	 	});
+       	}else{
+       		for(i=0;i<maskArr.length;i++){
+       			for(j=0;j<maskArr[0].length;j++){
+       				maskArr[i][j]=1;
+       			}
+       		}
+       		this.setState({
+       			maskArr:maskArr,
+       	 		trans:!trans
+       	 	});
+       	}
        }
        componentDidMount(){
        }
@@ -345,6 +376,7 @@
             <div>
               <h1>Dungeon</h1>
               <h3>Kill the boss in layer 4</h3>
+              <button onClick={this.toggle} className='btn btn-primary toggle' >TOGGLE</button>
               <Info health={this.state.health} weapon={this.state.weapon} attack={this.state.attack} level={this.state.level} nextLevel={this.state.nextLevel} layer={this.state.layer} />
               <GamePad userAdd={this.state.userAdd} cellState={this.state.cellState} maskArr={this.state.maskArr} />
             </div>
