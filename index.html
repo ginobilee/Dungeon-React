@@ -367,8 +367,49 @@
        	 	});
        	}
        }
-       move(){
-       	console.log('yes');
+       move(eve){
+       	let kc=eve.keyCode,cellState=this.state.cellState,maskArr=this.state.maskArr,userAdd=this.state.userAdd,nowi=userAdd.i,nowj=userAdd.j,newAdd={},trans=this.state.trans,valid=true;
+       	switch(kc){
+       		case 37:// left arrow
+       			if(nowj>0){
+              newAdd={i:nowi,j:nowj-1};
+            }
+       			break;
+          case 38:// up arrow
+       			if(nowi>0){
+              newAdd={i:nowi-1,j:nowj};
+            }
+       			break;
+          case 39:// right arrow
+       			if(nowj<90){
+              newAdd={i:nowi,j:nowj+1};
+            }
+       			break;
+          case 40:// down arrow
+            if(nowi<120){
+              newAdd={i:nowi+1,j:nowj};
+            }
+            break;
+          default:
+            valid=false;
+            break;
+       	}
+        if(valid){
+          if(cellState[newAdd.i][newAdd.j]==1){
+            //move up
+            cellState[nowi][nowj]=1;
+            cellState[newAdd.i][newAdd.j]=8;
+            if(!trans){
+              this.geneMask(maskArr,newAdd);
+            }
+            this.setState({
+              cellState:cellState,
+              maskArr:maskArr,
+              userAdd:newAdd
+            });
+          }
+          //if blood,soldier,weapon...
+        }
       }
        componentDidMount(){
        	this.refs.toggle.setAttribute('tabindex',1);
@@ -377,7 +418,6 @@
        componentDidUpdate(){
        }
        render(){
-
           return (
             <div className='content' ref='toggle' tabindex='1' onKeyDown={this.move}>
               <h1 >Dungeon</h1>
