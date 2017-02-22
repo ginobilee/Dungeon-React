@@ -15,6 +15,10 @@ h3{
   margin:20px auto;
   text-align: center;
 }
+.content{
+	border:none;
+	outline:none;
+}
 .message{
   margin-left: 80px;
   text-align: left;

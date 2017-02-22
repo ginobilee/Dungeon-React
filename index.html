@@ -134,6 +134,7 @@
          this.geneUser=this.geneUser.bind(this);
          this.geneMask=this.geneMask.bind(this);
          this.toggle=this.toggle.bind(this);
+         this.move=this.move.bind(this);
          let mapWidth=90,mapHeight=120,cellState=[],i,j,rooms=[],room={};
          for(i=0;i<mapHeight;i++){
            let tempRow=[];
@@ -366,19 +367,24 @@
        	 	});
        	}
        }
+       move(){
+       	console.log('yes');
+      }
        componentDidMount(){
+       	this.refs.toggle.setAttribute('tabindex',1);
+       	this.refs.toggle.focus();
        }
        componentDidUpdate(){
        }
        render(){
 
           return (
-            <div>
-              <h1>Dungeon</h1>
+            <div className='content' ref='toggle' tabindex='1' onKeyDown={this.move}>
+              <h1 >Dungeon</h1>
               <h3>Kill the boss in layer 4</h3>
               <button onClick={this.toggle} className='btn btn-primary toggle' >TOGGLE</button>
               <Info health={this.state.health} weapon={this.state.weapon} attack={this.state.attack} level={this.state.level} nextLevel={this.state.nextLevel} layer={this.state.layer} />
-              <GamePad userAdd={this.state.userAdd} cellState={this.state.cellState} maskArr={this.state.maskArr} />
+              <GamePad  userAdd={this.state.userAdd} cellState={this.state.cellState} maskArr={this.state.maskArr} />
             </div>
           );
        }
