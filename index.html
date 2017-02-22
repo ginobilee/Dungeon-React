@@ -39,6 +39,86 @@
       blood:10,//10 blood cells,each
       weapon:15//the user's weapon will attack 15 more blood
     };
+    const weapons=[
+      {name:'Stick',attack:10},{name:'Stone',attack:20},{name:'Knife',attack:30},{name:'Pistol',attack:60},{name:'Rifle',attack:100}
+    ]
+
+      var Info = (props) => {
+        return <div className='message'>
+                <span >Health: {props.health}</span>
+                <span >Weapon: {props.weapon}</span>
+                <span >Attack: {props.attack}</span>
+                <span >Level: {props.level}</span>
+                <span >Next Level: {props.nextLevel}</span>
+                <span >Layer: {props.layer}</span>
+              </div>;
+      };
+
+      var GamePad = (props) => {
+        let cellState = props.cellState,maskArr=props.maskArr,tempValue,len=cellState[0].length;
+        const map = cellState.map(function(ele,ind){
+           let cellRow = ele.map(function(e,i){
+               tempValue=cellState[ind][i];let cn='';
+               switch (tempValue) {
+                 case 0:
+                   cn='cell';
+                   break;
+                 case 1:
+                   cn='cell white';
+                   break;
+                 case 5:
+                   cn='cell orange';
+                   break;
+                 case 8:
+                   cn='cell blue';
+                   break;
+                 case 10:
+                 case 11:
+                 case 12:
+                 case 13:
+                 case 14:
+                   cn='cell red';
+                   break;
+                 case 20:
+                   cn='cell green';
+                   break;
+                 default:
+                   cn='cell';
+                   break;
+               }
+               return (<div className={cn} key={ind*len+i} data-key={ind*len+i}></div>);
+             },this);
+           return <div className='cellRow' key={ind}><div className='num'>{ind}</div>{cellRow}</div>;
+         },this);
+        const mask = maskArr.map(function(ele,ind){
+            let maskRow = ele.map(function(e,i){
+                tempValue=maskArr[ind][i];
+                return (<div className={tempValue==1?'maskcell':'maskcell black'} key={ind*len+i} data-key={ind*len+i}></div>);
+              },this);
+            return <div className='cellRow' key={ind}>{maskRow}</div>;
+          },this);
+        //get the map div offset
+        let userRow=props.userAdd.i,offsetTop;
+        console.log(userRow);
+        if(userRow<15){
+          offsetTop=0;
+        }else if(userRow>105){
+          offsetTop=-90*12;
+        }else{
+          offsetTop=(15-userRow)*12;
+        }
+        let topOff={
+          top:offsetTop+'px'
+        };
+        return <div className='stage'>
+                  <div className='map' style={topOff}>
+                    {map}
+                  </div>
+                  <div className='mask'>
+                    {mask}
+                  </div>
+              </div>;
+      };
 
       class GameManage extends React.Component{
        constructor(){
@@ -47,6 +127,8 @@
          this.geneNodes=this.geneNodes.bind(this);
          this.geneBloods=this.geneBloods.bind(this);
          this.geneWeapon=this.geneWeapon.bind(this);
+         this.geneUser=this.geneUser.bind(this);
+         this.geneMask=this.geneMask.bind(this);
          let mapWidth=100,mapHeight=120,cellState=[],i,j,rooms=[],room={};
          for(i=0;i<mapHeight;i++){
            let tempRow=[];
@@ -72,9 +154,28 @@
          this.geneNodes(cellState,rooms,layer1);
          this.geneBloods(cellState,rooms,layer1);
          this.geneWeapon(cellState,rooms,layer1);
-         //console.log(rooms);
+         let userAdd=this.geneUser(cellState,rooms,layer1);
+         //generate mask array,whose size is 30X100
+         let maskArr=[];
+         for(i=0;i<30;i++){
+           let tempRow=[];
+           for(j=0;j<100;j++){
+             tempRow.push(0);
+           }
+           maskArr.push(tempRow);
+         }
+         this.geneMask(maskArr,userAdd);
+
          this.state=({
-           cellState:cellState
+           cellState:cellState,
+           health:100,
+           weapon:0,
+           attack:10,
+           level:1,
+           nextLevel:100,
+           layer:1,
+           userAdd:userAdd,
+           maskArr:maskArr
          });
        }
        addRooms(cellState,rooms){
@@ -198,46 +299,54 @@
            }
          }
        }
+       geneUser(cellState,rooms,layer){
+         let i,rnRoom,celli,cellj;
+         for(i=0;i<1;i++){
+           rnRoom=Math.floor(Math.random()*rooms.length);
+           celli=rooms[rnRoom].origin_row+Math.ceil(Math.random()*(rooms[rnRoom].rows-1));
+           cellj=rooms[rnRoom].origin_col+Math.ceil(Math.random()*(rooms[rnRoom].cols-1));
+           if(cellState[celli][cellj]==1){
+             cellState[celli][cellj]=8;//8 for user
+             return {i:celli,j:cellj};
+           }else{
+             i--;
+           }
+         }
+       }
+       geneMask(maskArr,userAdd){
+         let i,j,centeri=userAdd.i,centerj=userAdd.j;
+         if(centeri>105){
+           centeri=centeri-170;//if user below 105,set mask center lower
+         }
+         else if(centeri>14){
+           centeri=15;
+         }
+         for(i=centeri-4;i<centeri+4;i++){
+           for(j=centerj-4;j<centerj+4;j++){
+             maskArr[i][j]=1;
+           }
+         }
+         for(i=4;i>1;i--){
+           for(j=4;j>5-i;j--){
+             maskArr[centeri-i][centerj-j]=0;
+             maskArr[centeri-i][centerj+j]=0;
+             maskArr[centeri+i][centerj-j]=0;
+             maskArr[centeri+i][centerj+j]=0;
+           }
+         }
+       }
        componentDidMount(){
        }
        componentDidUpdate(){
        }
        render(){
-         let cellState = this.state.cellState,tempValue,len=cellState[0].length;
-         const map = cellState.map(function(ele,ind){
-            let cellRow = ele.map(function(e,i){
-                tempValue=cellState[ind][i];let cn='';
-                switch (tempValue) {
-                  case 0:
-                    cn='cell';
-                    break;
-                  case 1:
-                    cn='cell white';
-                    break;
-                  case 5:
-                    cn='cell orange';
-                    break;
-                  case 10:
-                  case 11:
-                  case 12:
-                  case 13:
-                  case 14:
-                    cn='cell red';
-                    break;
-                  case 20:
-                    cn='cell green';
-                    break;
-                  default:
-                    cn='cell';
-                    break;
-                }
-                return (<div className={cn} key={ind*len+i} data-key={ind*len+i}></div>);
-              },this);
-            return <div className='cellRow' key={ind}><div className='num'>{ind}</div>{cellRow}</div>;
-          },this);
+
           return (
             <div>
-              {map}
+              <h1>Dungeon</h1>
+              <h3>Kill the boss in layer 4</h3>
+              <Info health={this.state.health} weapon={this.state.weapon} attack={this.state.attack} level={this.state.level} nextLevel={this.state.nextLevel} layer={this.state.layer} />
+              <GamePad userAdd={this.state.userAdd} cellState={this.state.cellState} maskArr={this.state.maskArr} />
             </div>
           );
        }

@@ -1,10 +1,51 @@
 body{
-
+  color: white;
+  background-color: #111;
+}
+h1{
+  margin-top: 50px;
+  font-size: 40px;
+}
+h3{
+  font-size: 15px;
+  margin-bottom: 50px;
 }
 #root{
   margin:20px auto;
   text-align: center;
-  color: white;
+}
+.message{
+  margin-left: 80px;
+  text-align: left;
+}
+.message span{
+  margin-right: 80px;
+  font-size: 20px;
+  color: blue;
+  font-weight: 800;
+}
+.stage{
+  position: absolute;
+  border: 1px red solid;
+  height: 360px;
+  width: 1200px;
+  display: inline-block;
+  margin-top: 30px;
+  left:40px;
+  z-index: 9;
+  overflow: hidden;
+}
+.map{
+  position: absolute;;
+  top: 0px;
+  z-index: 99;
+}
+.mask{
+  position: absolute;
+  width: 1200px;
+  height: 360px;
+  z-index: 999;
+  border: 1px blue solid;
 }
 .cellRow{
   height: 12px;
@@ -19,9 +60,17 @@ body{
 }
 .cell{
   display: inline-block;
-  background-color: black;
+  background-color: gray;
   width: 12px;
   height: 12px;
+}
+.maskcell{
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+}
+.black{
+  background-color: rgba(55,55,55,0.1);
 }
 .white{
   background-color: white;
@@ -34,4 +83,10 @@ body{
 }
 .orange{
   background-color: orange;
+}
+.blue{
+  background-color: blue;
+}
+.trans{
+  background-color: none;
 }
