@@ -17,12 +17,12 @@
     <div id='root'></div>
   </body>
   <script type='text/babel'>
-    const bloodVal=30;//each green cell add 30 blood
+    const bloodVal=30,UPGRADBLOOD=50;//each green cell add 30 blood
     const soldierC1={
-      attack:130,//one hit get 10 blood
+      attack:10,//one hit get 10 blood
       blood:10//one has 20 blood
     },soldierC2={
-      attack:120,
+      attack:20,
       blood:20
     },soldierC3={
       attack:30,
@@ -34,28 +34,38 @@
       attack:50,
       blood:100
     },soldierId=[soldierC1,soldierC2,soldierC3,soldierC4,soldierC5];
-    let layer1={//info for layer 1
+    const layers=[{//info for layer 1
       soldiers:[10,5,0,0,0],//index is soldiers' id,value is number
       blood:10,//10 blood cells,each
-      weapon:15//the user's weapon will attack 15 more blood
-    };
+    },{//info for layer 2
+      soldiers:[0,10,5,0,0],//index is soldiers' id,value is number
+      blood:10,//10 blood cells,each
+    },{//info for layer 1
+      soldiers:[0,0,10,5,0],//index is soldiers' id,value is number
+      blood:10,//10 blood cells,each
+    },{//info for layer 1
+      soldiers:[0,0,0,10,5],//index is soldiers' id,value is number
+      blood:10,//10 blood cells,each
+    }];
     const weapons={
-      1:{name:'Stick',attack:10},2:{name:'Stone',attack:20},3:{name:'Knife',attack:30},4:{name:'Pistol',attack:60},5:{name:'Rifle',attack:100}
+      0:{name:'Stick',attack:10},1:{name:'Stone',attack:20},2:{name:'Knife',attack:30},3:{name:'Pistol',attack:60},4:{name:'Rifle',attack:100}
     },upgradeNeed={1:100,2:200,3:300,4:400,5:500};
-    let soldiersInfo={};
+    let soldiersInfo={},bossLoc=[],bossAtt=40;
+    let bossBlood=2000;
 
       var Info = (props) => {
         return <div className='message'>
                 <span >Health: {props.health}</span>
                 <span >Weapon: {weapons[props.weapon].name}</span>
                 <span >Attack: {props.attack}</span>
-                <span >Level: {props.level}</span>
+                <span >Level: {props.level+1}</span>
                 <span >Next Level: {props.nextLevel}</span>
-                <span >Layer: {props.layer}</span>
+                <span >Layer: {props.layer+1}</span>
               </div>;
       };
 
       var GamePad = (props) => {
+      	console.log(Date.now()+':son will update');
         let cellState = props.cellState,maskArr=props.maskArr,tempValue,len=cellState[0].length;
         const map = cellState.map(function(ele,ind){
            let cellRow = ele.map(function(e,i){
@@ -64,12 +74,16 @@
                  cn='cell';
                }else if(tempValue==1){
                  cn='cell white';
+               }else if (tempValue==3) {
+                 cn='cell purple';
                }else if (tempValue==5) {
                  cn='cell orange';
                }else if (tempValue==8) {
                  cn='cell blue';
                }else if (tempValue==20) {
                  cn='cell green';
+               }else if (tempValue==44) {
+                 cn='cell boss';
                }else if (tempValue>49) {
                  cn='cell red';
                }else{
@@ -91,12 +105,12 @@
                 return (<div className='maskcell'>{i}</div>);
         },this);
         //get the map div offset
-        let userRow=props.userAdd.i,offsetTop;
+        let userRow=props.userAdd.i,offsetTop,mapHeight=90;
         //console.log(userRow);
         if(userRow<15){
           offsetTop=0;
-        }else if(userRow>105){
-          offsetTop=-90*12;
+        }else if(userRow>mapHeight-15){
+          offsetTop=-(mapHeight-30)*12;
         }else{
           offsetTop=(15-userRow)*12;
         }
@@ -122,17 +136,19 @@
          this.geneWeapon=this.geneWeapon.bind(this);
          this.geneUser=this.geneUser.bind(this);
          this.geneMask=this.geneMask.bind(this);
+         this.genePass=this.genePass.bind(this);
          this.toggle=this.toggle.bind(this);
          this.move=this.move.bind(this);
          this.restart=this.restart.bind(this);
          this.build=this.build.bind(this);
+         this.geneBoss=this.geneBoss.bind(this);
 
-         let newState=this.build();
+         let newState=this.build(0);
 
          this.state=(newState);
        }
-       build(){
-         let mapWidth=90,mapHeight=120,cellState=[],i,j,rooms=[],room={};
+       build(layerNum){
+         let mapWidth=90,mapHeight=90,cellState=[],i,j,rooms=[],room={};
          for(i=0;i<mapHeight;i++){
            let tempRow=[];
            for(j=0;j<mapWidth;j++){
@@ -154,33 +170,44 @@
          };
          rooms.push(room);
          this.addRooms(cellState,rooms);
-         this.geneSoldiers(cellState,rooms,layer1);
-         this.geneBloods(cellState,rooms,layer1);
-         this.geneWeapon(cellState,rooms,layer1);
-         let userAdd=this.geneUser(cellState,rooms,layer1);
+         this.geneSoldiers(cellState,rooms,layerNum);
+         if(layerNum==4){
+         		this.geneBoss(cellState,rooms);
+         }
+         this.geneBloods(cellState,rooms,layerNum);
+         this.geneWeapon(cellState,rooms);
+         this.genePass(cellState,rooms);
+         let userAdd=this.geneUser(cellState,rooms);
          //generate mask array,whose size is 30X90
          let maskArr=[];
          for(i=0;i<30;i++){
            let tempRow=[];
-           for(j=0;j<90;j++){
+           for(j=0;j<mapWidth;j++){
              tempRow.push(0);
            }
            maskArr.push(tempRow);
          }
          this.geneMask(maskArr,userAdd);
-         return {
-           cellState:cellState,
-           health:100,
-           weapon:1,
-           attack:10,
-           level:1,
-           nextLevel:100,
-           layer:1,
-           userAdd:userAdd,
-           maskArr:maskArr,
-           trans:false,
-           restart:false
-         }
+         if(layerNum==0){
+	         return {
+	           cellState:cellState,
+	           health:100,
+	           weapon:0,
+	           attack:10,
+	           level:0,
+	           nextLevel:100,
+	           layer:layerNum,
+	           userAdd:userAdd,
+	           maskArr:maskArr,
+	           trans:false
+	         }
+	       }else{//只更新需要更新的：cellstate，maskState，layer，userAdd，
+	       	 	 return {cellState:cellState,
+					           layer:layerNum,
+					           userAdd:userAdd,
+					           maskArr:maskArr
+					         }
+	       }
        }
        addRooms(cellState,rooms){
          let roomNum=rooms.length,parentRI=Math.floor(Math.random()*roomNum),parentRoom=rooms[parentRI],colMin=6,colRange=7,rowMin=7,rowRange=13;
@@ -258,8 +285,8 @@
            this.addRooms(cellState,rooms);
          }
        }
-       geneSoldiers(cellState,rooms,layer){
-         let soldiers=layer.soldiers,i=0,j=0;
+       geneSoldiers(cellState,rooms,num){
+         let soldiers=layers[num].soldiers,i=0,j=0;
          for(i=0;i<soldiers.length;i++){
            if(soldiers[i]>0){
              let rnRoom,celli,cellj;
@@ -283,10 +310,35 @@
              }
            }
          }
-         console.log(soldiersInfo);
+         //console.log(soldiersInfo);
        }
-       geneBloods(cellState,rooms,layer){
-         let bNum=layer.blood,i,rnRoom,celli,cellj;
+       geneBoss(cellState,rooms){
+         let i=0,j=0;
+         for(i=0;i<1;i++){
+             let rnRoom,celli,cellj;
+             for(j=0;j<1;j++){
+               rnRoom=Math.floor(Math.random()*rooms.length);
+               celli=rooms[rnRoom].origin_row+Math.ceil(Math.random()*(rooms[rnRoom].rows-1));
+               cellj=rooms[rnRoom].origin_col+Math.ceil(Math.random()*(rooms[rnRoom].cols-1));
+               if(cellState[celli][cellj]==1&&cellState[celli][cellj+1]==1&&cellState[celli+1][cellj]==1&&cellState[celli+1][cellj+1]==1){
+                 let num=44;
+                 cellState[celli][cellj]=num;//50 for class 1,11 for class 2...
+                 cellState[celli][cellj+1]==num;
+                 cellState[celli+1][cellj]==num;
+                 cellState[celli+1][cellj+1]==num;
+                 bossLoc.push({i:celli,j:cellj});
+                 bossLoc.push({i:celli,j:cellj+1});
+                 bossLoc.push({i:celli+1,j:cellj});
+                 bossLoc.push({i:celli+1,j:cellj+1});
+               }else{
+                 j--;
+               }
+             }
+         }
+         //console.log(soldiersInfo);
+       }
+       geneBloods(cellState,rooms,num){
+         let bNum=layers[num].blood,i,rnRoom,celli,cellj;
          for(i=0;i<bNum;i++){
            rnRoom=Math.floor(Math.random()*rooms.length);
            celli=rooms[rnRoom].origin_row+Math.ceil(Math.random()*(rooms[rnRoom].rows-1));
@@ -298,8 +350,8 @@
            }
          }
        }
-       geneWeapon(cellState,rooms,layer){
-         let weapon=layer.weapon,i,rnRoom,celli,cellj;
+       geneWeapon(cellState,rooms){
+         let i,rnRoom,celli,cellj;
          for(i=0;i<1;i++){
            rnRoom=Math.floor(Math.random()*rooms.length);
            celli=rooms[rnRoom].origin_row+Math.ceil(Math.random()*(rooms[rnRoom].rows-1));
@@ -311,7 +363,20 @@
            }
          }
        }
-       geneUser(cellState,rooms,layer){
+       genePass(cellState,rooms){
+       	 let i,rnRoom,celli,cellj;
+         for(i=0;i<1;i++){
+           rnRoom=Math.floor(Math.random()*rooms.length);
+           celli=rooms[rnRoom].origin_row+Math.ceil(Math.random()*(rooms[rnRoom].rows-1));
+           cellj=rooms[rnRoom].origin_col+Math.ceil(Math.random()*(rooms[rnRoom].cols-1));
+           if(cellState[celli][cellj]==1){
+             cellState[celli][cellj]=3;//3 for pass
+           }else{
+             i--;
+           }
+         }
+       }
+       geneUser(cellState,rooms){
          let i,rnRoom,celli,cellj;
          for(i=0;i<1;i++){
            rnRoom=Math.floor(Math.random()*rooms.length);
@@ -326,9 +391,9 @@
          }
        }
        geneMask(maskArr,userAdd){
-         let i,j,centeri=userAdd.i,centerj=userAdd.j;
-         if(centeri>105){
-           centeri=centeri-170;//if user below 105,set mask center lower
+         let i,j,centeri=userAdd.i,centerj=userAdd.j,mapHeight=90;
+         if(centeri>mapHeight-15){
+           centeri= centeri-(mapHeight-30);//if user below 105,set mask center lower
          }
          else if(centeri>14){
            centeri=15;
@@ -375,7 +440,8 @@
        move(eve){
        	let kc=eve.keyCode,cellState=this.state.cellState,maskArr=this.state.maskArr,
         userAdd=this.state.userAdd,nowi=userAdd.i,nowj=userAdd.j,newAdd={},trans=this.state.trans,
-        valid=true,oldHealth=this.state.health,newHealth,level=this.state.level;
+        valid=true,oldHealth=this.state.health,newHealth,level=this.state.level,
+        layer=this.state.layer,mapWidth=90,mapHeight=90;
        	switch(kc){
        		case 37:// left arrow
        			if(nowj>0){
@@ -388,12 +454,12 @@
             }
        			break;
           case 39:// right arrow
-       			if(nowj<90){
+       			if(nowj<mapWidth){
               newAdd={i:nowi,j:nowj+1};
             }
        			break;
           case 40:// down arrow
-            if(nowi<120){
+            if(nowi<mapHeight){
               newAdd={i:nowi+1,j:nowj};
             }
             break;
@@ -414,13 +480,32 @@
               maskArr:maskArr,
               userAdd:newAdd
             });
-          }else if(cellState[newAdd.i][newAdd.j]==20){
+          }else if (cellState[newAdd.i][newAdd.j]==3) {//meet a pass
+            layer++;
+            let newL=this.build(layer);
+            this.setState(newL);
+          }else if (cellState[newAdd.i][newAdd.j]==5) {//meet a weapon
+            let weapon=layer+1,userAtt=this.state.attack;
+            userAtt+=weapons[weapon].attack;
             cellState[nowi][nowj]=1;
             cellState[newAdd.i][newAdd.j]=8;
             if(!trans){
               this.geneMask(maskArr,newAdd);
             }
-            console.log(oldHealth);
+            this.setState({
+              cellState:cellState,
+              maskArr:maskArr,
+              userAdd:newAdd,
+              attack:userAtt,
+            	weapon:weapon
+            });
+          }else if(cellState[newAdd.i][newAdd.j]==20){//green blood
+            cellState[nowi][nowj]=1;
+            cellState[newAdd.i][newAdd.j]=8;
+            if(!trans){
+              this.geneMask(maskArr,newAdd);
+            }
+            //console.log(oldHealth);
             newHealth=oldHealth+20;
             this.setState({
               cellState:cellState,
@@ -428,8 +513,54 @@
               userAdd:newAdd,
               health:newHealth
             });
+          }else if(cellState[newAdd.i][newAdd.j]==44){//meet boss,who has 2000 blood,40 attacks
+            let userBlood=this.state.health,userAtt=this.state.attack,
+            nextLevel=this.state.nextLevel-bossAtt;
+            bossBlood-=userAtt;userBlood-=bossAtt;
+            if(userBlood<1){//user dies
+              this.setState({
+                health:0
+              });
+            }else if (bossBlood<1){//boss dies
+            	if(nextLevel<1){//upgrade
+                level+=1;
+                nextLevel=upgradeNeed[level];
+                userAtt=userAtt+(level+1)*15;//15*level more attack for a upgrade
+                userBlood+=UPGRADBLOOD;//50 blood for a upgrade
+              }
+              cellState[nowi][nowj]=1;
+              for(let m=0;m<bossLoc.length;m++){
+              	let temp=bossLoc[m];
+              	cellState[temp['i']][temp['j']]=1;
+              }
+              cellState[newAdd.i][newAdd.j]=8;
+              if(!trans){
+                this.geneMask(maskArr,newAdd);
+              }
+              this.setState({
+                level:level,
+                nextLevel:nextLevel,
+                attack:userAtt,
+                cellState:cellState,
+                maskArr:maskArr,
+                userAdd:newAdd,
+                health:userBlood
+              });
+            }else{//both alive,just need upgrade health,nextLevel,
+              if(nextLevel<1){//upgrade
+                level+=1;
+                nextLevel=upgradeNeed[level];
+                userAtt=userAtt+(level+1)*15;//15*level more attack for a upgrade
+                userBlood+=UPGRADBLOOD;//50 blood for a upgrade
+              }
+              this.setState({
+                health:userBlood,
+                nextLevel:nextLevel
+              })
+            }
           }else if(cellState[newAdd.i][newAdd.j]>49){
-            let num=cellState[newAdd.i][newAdd.j],userBlood=this.state.health,userAtt=this.state.attack,soldierAtt=soldiersInfo[num].attack,soldierBlood=soldiersInfo[num].blood;
+            let num=cellState[newAdd.i][newAdd.j],userBlood=this.state.health,userAtt=this.state.attack,
+            soldierAtt=soldiersInfo[num].attack,soldierBlood=soldiersInfo[num].blood;
             soldierBlood-=userAtt;userBlood-=soldierAtt;
             let nextLevel=this.state.nextLevel-soldierAtt;
             if(userBlood<1){//user dies
@@ -440,8 +571,8 @@
               if(nextLevel<1){//upgrade
                 level+=1;
                 nextLevel=upgradeNeed[level];
-                userAtt+=level*20;//20*level more attack for a upgrade
-                soldierBlood+=50;//50 blood for a upgrade
+                userAtt=userAtt+(level+1)*15;//20*level more attack for a upgrade
+                userBlood+=UPGRADBLOOD;//50 blood for a upgrade
               }
               soldiersInfo[num].blood=0;
               cellState[nowi][nowj]=1;
@@ -462,8 +593,8 @@
               if(nextLevel<1){//upgrade
                 level+=1;
                 nextLevel=upgradeNeed[level];
-                userAtt+=level*10;//10*level more attack for a upgrade
-                soldierBlood+=80;//80 blood for a upgrade
+                userAtt=userAtt+(level+1)*15;//15*level more attack for a upgrade
+                userBlood+=UPGRADBLOOD;//50 blood for a upgrade
               }
               soldiersInfo[num].blood=soldierBlood;
               this.setState({
@@ -471,11 +602,12 @@
                 nextLevel:nextLevel
               })
             }
+          }else{
           }
         }
        }
        restart(){
-         let newS=this.build();
+         let newS=this.build(0);
          this.state=newS;
          this.forceUpdate();
          this.refs.toggle.setAttribute('tabindex',1);
@@ -485,7 +617,11 @@
        	this.refs.toggle.setAttribute('tabindex',1);
        	this.refs.toggle.focus();
        }
+       componentWillUpdate(){
+       	console.log(Date.now()+':update will update');
+       }
        componentDidUpdate(){
+       	console.log(Date.now()+':update end');
        }
        shouldComponentUpdate(){
          let health=this.state.health;if(health==0){
@@ -496,6 +632,7 @@
        }
        render(){
          let health=this.state.health;
+
           return (
             <div className='content' ref='toggle' tabindex='1' onKeyDown={this.move}>
               <h1 >Dungeon</h1>

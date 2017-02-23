@@ -28,6 +28,7 @@ h3{
   font-size: 20px;
   color: blue;
   font-weight: 800;
+  width:150px;
 }
 .stage{
   position: absolute;
@@ -89,6 +90,12 @@ h3{
 }
 .blue{
   background-color: blue;
+}
+.purple{
+  background-color: purple;
+}
+.boss{
+  background-color: #CC6600;
 }
 .toggle{
 	position:absolute;
