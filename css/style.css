@@ -95,3 +95,11 @@ h3{
 	top:170px;
 	right:100px;
 }
+.hide{
+  visibility:hidden;
+}
+.warn{
+  position: absolute;
+  bottom: 10px;
+  left:500px;
+}
