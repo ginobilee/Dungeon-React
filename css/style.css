@@ -9,7 +9,7 @@ h1{
 }
 h3{
   font-size: 15px;
-  margin-bottom: 50px;
+  margin-bottom: 20px;
 }
 #root{
   margin:20px auto;
@@ -20,23 +20,25 @@ h3{
 	outline:none;
 }
 .message{
-  margin-left: 80px;
+  margin-left: 50px;
   text-align: left;
 }
-.message span{
-  margin-right: 50px;
+.message .item{
+	display:inline-block;
+  margin-right: 20px;
   font-size: 20px;
   color: blue;
   font-weight: 800;
   width:150px;
+  text-align:center;
+  border:1px dashed gray;
 }
 .stage{
   position: absolute;
-  border: 1px red solid;
   height: 360px;
-  width: 1200px;
+  width: 1080px;
   display: inline-block;
-  margin-top: 30px;
+  margin-top: 10px;
   left:40px;
   z-index: 9;
   overflow:hidden;
@@ -49,7 +51,6 @@ h3{
   position: absolute;
   height: 360px;
   z-index: 999;
-  border: 1px blue solid;
 }
 .cellRow{
   height: 12px;
@@ -99,7 +100,7 @@ h3{
 }
 .toggle{
 	position:absolute;
-	top:170px;
+	top:150px;
 	right:100px;
 }
 .hide{
@@ -107,6 +108,28 @@ h3{
 }
 .warn{
   position: absolute;
-  bottom: 10px;
+  bottom: 80px;
   left:500px;
+}
+.note{
+	position:absolute;
+	font-size:20px;
+	bottom:0px;
+	width:1080px;
+	color:#cc0
+}
+.colorBlue{
+	color:blue;
+}
+.colorGreen{
+	color:green;
+}
+.colorRed{
+	color:red;
+}
+.colorOrange{
+	color:orange;
+}
+.colorPurple{
+	color:purple;
 }
