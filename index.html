@@ -60,19 +60,38 @@
        maskArr.push(tempRow);
      }
 
-      var Info = (props) => {
-        return <div className='message'>
-                <span className='item'>Health: {props.health}</span>
-                <span className='item'>Weapon: {weapons[props.weapon].name}</span>
-                <span className='item'>Attack: {props.attack}</span>
-                <span className='item'>Level: {props.level+1}</span>
-                <span className='item'>Next Level: {props.nextLevel}</span>
-                <span className='item'>Layer: {props.layer+1}</span>
-                <p className='note'><span className='colorBlue'>Blue--user</span>,<span className='colorGreen'>Green--blood</span>,<span className='colorRed'>Red--soldier</span>,<span className='colorOrange'>Orange for a weapon</span>,
-                <span className='colorPurple'>purple--transport to next layer</span>,<br />
-                But once you go down to next Layer,you CANT go back!
-                And you can click 'TOGGLE' to get a clear sight!</p>
-              </div>;
+      class Info extends React.Component{
+      	constructor(props){
+      		super(props);
+      	}
+      	render(){      		
+	        return <div className='message'>	                
+	                <div className='item'>
+	                	<p className='itemName'>Health</p>
+	                	<p className='itemValue'>{this.props.health}</p>
+	                </div>
+	                <div className='item'>
+		                <p className='itemName'>Weapon</p>
+	                	<p className='itemValue'>{weapons[this.props.weapon].name}</p>
+	                </div>
+	                <div className='item'>
+	                	<p className='itemName'>Attack</p>
+	                	<p className='itemValue'>{this.props.attack}</p>
+	                </div>
+	                <div className='item'>
+	                	<p className='itemName'>Level</p>
+	                	<p className='itemValue'>{this.props.level+1}</p>
+	                </div>
+	                <div className='item'>
+	                	<p className='itemName'>Next Level</p>
+	                	<p className='itemValue'>{this.props.nextLevel}</p>
+	                </div>
+	                <div className='item'>
+	                	<p className='itemName'>Layer</p>
+	                	<p className='itemValue'>{this.props.layer+1}</p>    
+	                </div>            
+	              </div>;
+        }
       };
 
       var GamePad = (props) => {
@@ -316,7 +335,7 @@
            }
            cellState[passi][passj]=1;
            rooms.push(room);
-           if(rooms.length<8){
+           if(rooms.length<15){
              this.addRooms(rooms);
            }
          }else{
@@ -683,13 +702,22 @@
          let health=this.state.health,win=this.state.win;
 
           return (
-            <div className='content' ref='toggle' tabindex='1' onKeyDown={this.move}>
-              <h1 >Dungeon</h1>
-              <h3>Kill the boss in layer 4</h3>
-              <button onClick={this.toggle} className='btn btn-primary toggle' >TOGGLE</button>
-              <Info health={this.state.health} weapon={this.state.weapon} attack={this.state.attack} level={this.state.level} nextLevel={this.state.nextLevel} layer={this.state.layer} />
-              <GamePad  userAdd={this.state.userAdd} cellState={this.state.cellState} maskArr={this.state.maskArr} />
-              <div className={health==0?'warn':'hide'}><button onClick={this.restart} className='btn btn-primary'>{win?'Hero,You win!Take the beauty home:D':'Game Over! Click here to restart!'}</button></div>
+            <div className='content' ref='toggle' tabindex='1' onKeyDown={this.move}>              
+              <div className='note'>
+              		<div className='seg colorBlue'><span className='cell hint blue'></span>Blue--user</div>
+              		<div className='seg colorGreen'><span className='cell hint green'></span>Green--blood</div>
+              		<div className='seg colorRed'><span className='cell hint red'></span>Red--soldier</div>
+              		<div className='seg colorOrange'><span className='cell hint orange'></span>Orange for a weapon</div>
+	                <div className='seg colorPurple'><span className='cell hint purple'></span>purple--transport to next layer</div><br />
+	                <button onClick={this.toggle} className='btn btn-primary toggle' >TOGGLE</button>	
+	            </div>
+	            <GamePad  userAdd={this.state.userAdd} cellState={this.state.cellState} maskArr={this.state.maskArr} />              
+              <Info health={this.state.health} weapon={this.state.weapon} attack={this.state.attack} level={this.state.level} nextLevel={this.state.nextLevel} layer={this.state.layer} toggled={this.toggle} />            
+              <div className={health==0?'warn':'hide'}><button onClick={this.restart} className='btn btn-danger long'>{win?'Hero,You win!Take the beauty home:D':'Game Over! Click here to restart!'}</button></div>
+            	<div className='headline'>
+	            	<div className='title' >Dungeon</div>
+	              <div className='byline' >Kill the boss in layer 4</div>  
+	            </div>
             </div>
           );
        }
