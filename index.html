@@ -49,7 +49,7 @@
     }];
     const weapons={
       0:{name:'Stick',attack:10},1:{name:'Stone',attack:15},2:{name:'Knife',attack:20},3:{name:'Pistol',attack:30},4:{name:'Rifle',attack:40}
-    },upgradeNeed={1:100,2:200,3:300,4:400,5:500};
+    },upgradeNeed={1:100,2:200,3:300,4:400,5:500,6:600};
     let soldiersInfo={},bossLoc=[],bossAtt=40;
     let bossBlood=2000,mapWidth=90,mapHeight=90,cellState=[],maskArr=[],maskHeight=30,n;
      for(let m=0;m<maskHeight;m++){
@@ -513,27 +513,31 @@
        }
        move(eve){
        	let kc=eve.keyCode,userAdd=this.state.userAdd,nowi=userAdd.iNum,nowj=userAdd.jNum,
-       	newAdd={},trans=this.state.trans,valid=true,oldHealth=this.state.health,newHealth,
+       	newAdd={},trans=this.state.trans,valid=false,oldHealth=this.state.health,newHealth,
        	level=this.state.level,layer=this.state.layer;
        	switch(kc){
        		case 37:// left arrow
        			if(nowj>0){
               newAdd={iNum:nowi,jNum:nowj-1};
+              valid=true;
             }
        			break;
           case 38:// up arrow
        			if(nowi>0){
               newAdd={iNum:nowi-1,jNum:nowj};
+              valid=true;
             }
        			break;
           case 39:// right arrow
        			if(nowj<mapWidth-1){
               newAdd={iNum:nowi,jNum:nowj+1};
+              valid=true;
             }
        			break;
           case 40:// down arrow
             if(nowi<mapHeight-1){
               newAdd={iNum:nowi+1,jNum:nowj};
+              valid=true;
             }
             break;
           default:
@@ -669,7 +673,11 @@
                 userAtt=userAtt+(level+1)*10;//10*level more attack for a upgrade
                 newHealth+=UPGRADBLOOD;//50 blood for a upgrade
               }
-              soldiersInfo[num].blood=soldierBlood;
+              if(soldiersInfo[num].blood!=undefined){
+              	soldiersInfo[num].blood=soldierBlood;
+              }else{
+              	console.log('here');
+              }
               this.setState({
                 health:newHealth,
                 nextLevel:nextLevel
@@ -697,7 +705,8 @@
        	//console.log(Date.now()+':update end');
        }
        shouldComponentUpdate(){
-         let health=this.state.health,win=this.state.win;if(health==0 || win){
+         let health=this.state.health,win=this.state.win;
+         if(health==0 || win){
            return false;
          }else{
            return true;
@@ -713,15 +722,14 @@
               		<div className='seg colorGreen'><span className='cell hint green'></span>Blood</div>
               		<div className='seg colorRed'><span className='cell hint red'></span>Soldier</div>
               		<div className='seg colorOrange'><span className='cell hint orange'></span>Weapon</div>
-	                <div className='seg colorPurple'><span className='cell hint purple'></span>Next Layer</div><br />
-	                
+	                <div className='seg colorPurple'><span className='cell hint purple'></span>Next Layer</div><br />	                
 	            </div>
 	            <GamePad  userAdd={this.state.userAdd} cellState={this.state.cellState} maskArr={this.state.maskArr} />              
               <Info health={this.state.health} weapon={this.state.weapon} attack={this.state.attack} level={this.state.level} nextLevel={this.state.nextLevel} layer={this.state.layer} toggle={this.toggle} />            
-              <div className={health==0?'warn':'hide'}><button onClick={this.restart} className='btn btn-danger long'>{win?'Hero,You win!Take the beauty home:D':'Game Over! Click here to restart!'}</button></div>
+              <div className={(win||(health==0))?'warn':'hide'}><button onClick={this.restart} className='btn btn-danger long'>{win?'Hero,You win!  Take the beauty home:D':'Game Over! Click here to restart!'}</button></div>
             	<div className='headline'>
-	            	<div className='title' >Dungeon</div>
-	              <div className='byline' >Kill the boss in layer 4</div>  
+	            	<div className='title'>Dungeon</div>
+	              <div className='byline'>Kill the boss in layer 4</div>  
 	            </div>
             </div>
           );

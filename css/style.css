@@ -17,7 +17,7 @@ body{
 	margin-top:0px;
 }
 .note{
-	position:fixed;
+	position:relative;
 	font-size:18px;
 	color:#cc0;
 	width:100%;
@@ -25,6 +25,7 @@ body{
 	border:0px solid blue;
 	text-align:left;
 	padding-left:80px;
+	z-index:1000;
 }
 .seg{
 	display:inline-block;
@@ -50,11 +51,10 @@ body{
 }
 .stage{
   position: relative;
-  top:60px;
+  top:50px;
   height: 360px;
   width: 1080px;
   display: inline-block;
-  margin-top: 10px;
   z-index: 9;
   overflow:hidden;
 }
@@ -106,17 +106,6 @@ body{
 .boss{
   background-color: #CC6600;
 }
-.hide{
-  visibility:hidden;
-}
-.warn{
-  position: absolute;
-  bottom: 100px;
-  left:500px;
-}
-.long{
-	width:300px;
-}
 .message{
 	position:relative;
 	display:inline-block;
@@ -124,6 +113,7 @@ body{
   text-align: left;
   top:75px;
   margin-left:30px; 
+  z-index:1000;
 }
 .toggle{
 	width:100px;
@@ -146,10 +136,23 @@ body{
 	line-height:10px;
 	margin-top:15px;
 }
+.hide{
+  visibility:hidden;
+}
+.warn{
+  position: fixed;
+  top: 350px;
+  left:300px;
+  z-index:1000;
+}
+.long{
+	width:600px;
+  font-size:30px;
+}
 .headline{
 	background-color:#858585;
 	position:fixed;
-	bottom:0;
+	bottom:0px;
 	width:100%;
 	text-align:left;
 	padding-bottom:10px;
@@ -165,4 +168,16 @@ body{
 	display:inline-block;
   font-size: 25px;
   color:black
+}
+@media screen and (max-width: 1230px) {
+		.stage{
+			top:80px;
+		}
+    .message {
+        width:800px;
+        margin:0 auto;
+    }
+    .toggle{
+    	margin-right:100px;
+    }
 }
