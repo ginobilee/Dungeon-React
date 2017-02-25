@@ -28,16 +28,10 @@ body{
 }
 .seg{
 	display:inline-block;
-	margin-right:50px;
+	margin-right:80px;
 }
 .hint{
 	margin-right:10px;
-}
-.toggle{
-	position:fixed;
-	top:80px;
-	right:50px;
-	margin-left:50px;
 }
 .colorBlue{
 	color:blue;
@@ -56,7 +50,7 @@ body{
 }
 .stage{
   position: relative;
-  top:100px;
+  top:60px;
   height: 360px;
   width: 1080px;
   display: inline-block;
@@ -128,8 +122,12 @@ body{
 	display:inline-block;
 	width:100px;
   text-align: left;
-  top:120px;
+  top:75px;
   margin-left:30px; 
+}
+.toggle{
+	width:100px;
+	margin-bottom:20px;
 }
 .item{
 	display:inline-block;

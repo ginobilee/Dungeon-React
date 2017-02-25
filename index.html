@@ -19,7 +19,7 @@
   <script type='text/babel'>
     const bloodVal=30,UPGRADBLOOD=50;//each green cell add 30 blood
     const soldierC1={
-      attack:10,//one hit get 10 blood
+      attack:190,//one hit get 10 blood
       blood:10//one has 20 blood
     },soldierC2={
       attack:20,
@@ -63,9 +63,14 @@
       class Info extends React.Component{
       	constructor(props){
       		super(props);
+      		this.toggle=this.toggle.bind(this);
+      	}
+      	toggle(){
+      		this.props.toggle();
       	}
       	render(){      		
-	        return <div className='message'>	                
+	        return <div className='message'>	
+	        				<button onClick={this.toggle} className='btn btn-primary toggle' >TOGGLE</button>	                
 	                <div className='item'>
 	                	<p className='itemName'>Health</p>
 	                	<p className='itemValue'>{this.props.health}</p>
@@ -704,15 +709,15 @@
           return (
             <div className='content' ref='toggle' tabindex='1' onKeyDown={this.move}>              
               <div className='note'>
-              		<div className='seg colorBlue'><span className='cell hint blue'></span>Blue--user</div>
-              		<div className='seg colorGreen'><span className='cell hint green'></span>Green--blood</div>
-              		<div className='seg colorRed'><span className='cell hint red'></span>Red--soldier</div>
-              		<div className='seg colorOrange'><span className='cell hint orange'></span>Orange for a weapon</div>
-	                <div className='seg colorPurple'><span className='cell hint purple'></span>purple--transport to next layer</div><br />
-	                <button onClick={this.toggle} className='btn btn-primary toggle' >TOGGLE</button>	
+              		<div className='seg colorBlue'><span className='cell hint blue'></span>User</div>
+              		<div className='seg colorGreen'><span className='cell hint green'></span>Blood</div>
+              		<div className='seg colorRed'><span className='cell hint red'></span>Soldier</div>
+              		<div className='seg colorOrange'><span className='cell hint orange'></span>Weapon</div>
+	                <div className='seg colorPurple'><span className='cell hint purple'></span>Next Layer</div><br />
+	                
 	            </div>
 	            <GamePad  userAdd={this.state.userAdd} cellState={this.state.cellState} maskArr={this.state.maskArr} />              
-              <Info health={this.state.health} weapon={this.state.weapon} attack={this.state.attack} level={this.state.level} nextLevel={this.state.nextLevel} layer={this.state.layer} toggled={this.toggle} />            
+              <Info health={this.state.health} weapon={this.state.weapon} attack={this.state.attack} level={this.state.level} nextLevel={this.state.nextLevel} layer={this.state.layer} toggle={this.toggle} />            
               <div className={health==0?'warn':'hide'}><button onClick={this.restart} className='btn btn-danger long'>{win?'Hero,You win!Take the beauty home:D':'Game Over! Click here to restart!'}</button></div>
             	<div className='headline'>
 	            	<div className='title' >Dungeon</div>
